@@ -1,0 +1,32 @@
+{
+	"name": "DsPy",
+	"dockerComposeFile": "../compose.yml",
+	"features": {
+
+		"ghcr.io/devcontainers/features/python:1": {}
+	},
+	"service": "dspy",
+	"shutdownAction": "stopCompose",
+	"workspaceFolder": "/workspace",
+	"postStartCommand": "make",
+	"customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "humao.rest-client",
+        "charliermarsh.ruff",
+        "PKief.material-icon-theme",
+        "njqdev.vscode-python-typehint",
+        "KevinRose.vsc-python-indent",
+        "njpwerner.autodocstring",
+        "LittleFoxTeam.vscode-python-test-adapter",
+        "formulahendry.code-runner"
+      ],
+      "settings": {
+        "python.formatting.provider": "none", // Disable default python formater
+        "editor.formatOnSave": true,
+        "ruff.format.onSave": true, // Ruff's own setting for format on save.
+      }
+    }
+}
+}

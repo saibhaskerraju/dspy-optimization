@@ -1,0 +1,10 @@
+services:
+  dspy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.local
+    volumes:
+      - .:/workspace:cached
+    command: sleep infinity
