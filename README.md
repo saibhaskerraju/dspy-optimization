@@ -15,3 +15,5 @@ mlflow server --backend-store-uri sqlite:///mydb.sqlite
 # Documentation Hierarchy
 
 - [Prompt Engineering Problems](docs/1.Prompt_Engineering.md)
+- [Optimizers Used](docs/3.Optimization_Solution.md)
+- [Evaluators](docs/4.Evaluation_Solution.md)
