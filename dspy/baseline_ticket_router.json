@@ -1,0 +1,32 @@
+{
+  "router.predict": {
+    "traces": [],
+    "train": [],
+    "demos": [],
+    "signature": {
+      "instructions": "Route support tickets to appropriate teams.",
+      "fields": [
+        {
+          "prefix": "Ticket Text:",
+          "description": "Customer support ticket content"
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Team:",
+          "description": "One of: Billing, Technical, Sales, Urgent, General"
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.12",
+      "dspy": "3.0.3",
+      "cloudpickle": "3.1"
+    }
+  }
+}

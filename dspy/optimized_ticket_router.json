@@ -1,0 +1,107 @@
+{
+  "router.predict": {
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "ticket_text": "I was double charged this month, need refund",
+        "reasoning": "The customer reports being double charged and requests a refund, which pertains to billing issues.",
+        "team": "Billing"
+      },
+      {
+        "augmented": true,
+        "ticket_text": "API giving 500 errors since morning",
+        "reasoning": "The ticket indicates a technical issue with the API, specifically server errors (500 errors), which suggests a problem with the technical infrastructure that needs immediate attention.",
+        "team": "Technical"
+      },
+      {
+        "augmented": true,
+        "ticket_text": "Website completely down, customers complaining",
+        "reasoning": "The ticket indicates a critical outage affecting the website, which is likely impacting many users and requires immediate technical attention.",
+        "team": "Urgent"
+      },
+      {
+        "augmented": true,
+        "ticket_text": "Want to upgrade to enterprise plan",
+        "reasoning": "Not supplied for this particular example.",
+        "team": "Sales"
+      },
+      {
+        "augmented": true,
+        "ticket_text": "Where to download invoice?",
+        "reasoning": "Not supplied for this particular example.",
+        "team": "Billing"
+      },
+      {
+        "ticket_text": "Mobile app crashing on iOS",
+        "team": "Technical"
+      },
+      {
+        "ticket_text": "Need pricing for 100 users",
+        "team": "Sales"
+      },
+      {
+        "ticket_text": "Security breach suspected",
+        "team": "Urgent"
+      },
+      {
+        "ticket_text": "Volume discount for startup?",
+        "team": "Sales"
+      },
+      {
+        "ticket_text": "Payment failed but money deducted",
+        "team": "Billing"
+      },
+      {
+        "ticket_text": "Slow response times from API",
+        "team": "Technical"
+      },
+      {
+        "ticket_text": "Interested in API partnership",
+        "team": "Sales"
+      },
+      {
+        "ticket_text": "Server not responding, complete outage",
+        "team": "Urgent"
+      },
+      {
+        "ticket_text": "Subscription cancelled but still charged",
+        "team": "Billing"
+      },
+      {
+        "ticket_text": "Where is my order confirmation?",
+        "team": "General"
+      },
+      {
+        "ticket_text": "How to change company address?",
+        "team": "General"
+      }
+    ],
+    "signature": {
+      "instructions": "Route support tickets to appropriate teams.",
+      "fields": [
+        {
+          "prefix": "Ticket Text:",
+          "description": "Customer support ticket content"
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Team:",
+          "description": "One of: Billing, Technical, Sales, Urgent, General"
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.12",
+      "dspy": "3.0.3",
+      "cloudpickle": "3.1"
+    }
+  }
+}

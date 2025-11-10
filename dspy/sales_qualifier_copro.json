@@ -1,0 +1,56 @@
+{
+  "qualify.predict": {
+    "traces": [],
+    "train": [],
+    "demos": [],
+    "signature": {
+      "instructions": "You will analyze a given sales email and determine the probability that the deal will be successful. Please provide a detailed reasoning process that considers the email's tone, content, and coherence. Conclude with a clear percentage or qualitative estimate (such as 'high', 'medium', or 'low') of the deal’s success likelihood. Be thorough in your analysis, and make sure to justify your prediction with supporting thoughts. Use bullet points if helpful for clarity before providing your final assessment.",
+      "fields": [
+        {
+          "prefix": "Email Conversation:",
+          "description": "Email exchange between sales and prospect"
+        },
+        {
+          "prefix": "Reasoning:",
+          "description": "Step-by-step analysis of all factors"
+        },
+        {
+          "prefix": "Company Tier:",
+          "description": "Startup, SMB, Mid-Market, Enterprise"
+        },
+        {
+          "prefix": "Decision Maker Engaged:",
+          "description": "yes, no, or partially"
+        },
+        {
+          "prefix": "Budget Alignment:",
+          "description": "below, within, or above our pricing"
+        },
+        {
+          "prefix": "Urgency Level:",
+          "description": "low, medium, high, critical"
+        },
+        {
+          "prefix": "Deal Stage:",
+          "description": "Discovery, Demo, Proposal, Negotiation, Closed-Won, Closed-Lost"
+        },
+        {
+          "prefix": "Confidence Score:",
+          "description": "0-100% probability of closing"
+        },
+        {
+          "prefix": "Output your response exactly in the following format:\n- Analysis: (your detailed reasoning process, possibly bullet points)\n- Deal Success Probability: (a percentage like 80%) or qualitative label ('high', 'medium', 'low')\n\nYour response should include the reasoning process followed by the probability or assessment.",
+          "description": "Specific recommended sales action"
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.12",
+      "dspy": "3.0.3",
+      "cloudpickle": "3.1"
+    }
+  }
+}
