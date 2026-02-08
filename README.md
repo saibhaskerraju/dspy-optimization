@@ -17,17 +17,18 @@ DSPy is a framework for building and optimizing LLM programs using declarative c
 
 # Documentation
 
-To understand the impoortance of DsPy framework. we need to understand the potential pain points of prompt engineering.
+To understand the importance of the DSPy framework, we need to understand the potential pain points of prompt engineering.
 
-This repository provides practical examples comparing trditional manual prompt engineering with DSPy-based declarative programming.
+This repository provides practical examples comparing traditional manual prompt engineering with DSPy-based declarative programming.
 
 - [1. Prompt Engineering Problems](docs/1.Prompt_Engineering.md) - Explore common challenges in prompt engineering and how DSPy addresses them.
+- [2. Multi-Stage Workflow](docs/2.Multi-Stage%20Workflow.md) - See how DSPy enables modular, reusable pipelines for complex tasks.
+- [3. Tool Calling and Reasoning](docs/3.Tool%20Calling.md) - Learn how DSPy structures reasoning and tool use for better performance and auditability.
+# Local Setup
 
-# Local setup
+- Open this solution in dev container mode, then run the files mentioned in the [Documentation Hierarchy](#documentation-hierarchy)
 
-- Open this solution in dev container mode run the files mentioned in the [Documentation Hierarchy](#documentation-hierarchy)
-
-# Enable ML-Flow for local debugging
+# Enable MLflow for Local Debugging
 
 - Run the following command
 ```sh

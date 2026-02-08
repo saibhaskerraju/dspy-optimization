@@ -1,18 +1,17 @@
 {
-	"name": "DsPy",
-	"dockerComposeFile": "../compose.yml",
-	"features": {
-
-		"ghcr.io/devcontainers/features/python:1": {
+  "name": "DsPy",
+  "dockerComposeFile": "../compose.yml",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
       "version": "3.12"
     },
-		"ghcr.io/devcontainers/features/git:1": {}
-	},
-	"service": "dspy",
-	"shutdownAction": "stopCompose",
-	"workspaceFolder": "/workspace",
-	"postStartCommand": "make",
-	"customizations": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "service": "dspy",
+  "shutdownAction": "stopCompose",
+  "workspaceFolder": "/workspace",
+  "postStartCommand": "make",
+  "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
@@ -31,5 +30,5 @@
         "ruff.format.onSave": true, // Ruff's own setting for format on save.
       }
     }
-}
+  }
 }
