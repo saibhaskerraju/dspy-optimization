@@ -1,0 +1,97 @@
+{
+  "classify.predict": {
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "email": "I was charged twice this month for my subscription. Can you help?",
+        "reasoning": "Customer reports double billing issue and seeks assistance",
+        "category": "Billing",
+        "confidence": "Not supplied for this particular example."
+      },
+      {
+        "augmented": true,
+        "email": "My credit card was declined but the bank says it is fine.",
+        "reasoning": "Issue related to payment processing despite valid credit card information",
+        "category": "Billing",
+        "confidence": "Not supplied for this particular example."
+      },
+      {
+        "augmented": true,
+        "email": "The app crashes every time I try to open it after the update.",
+        "reasoning": "App crashing issue post-update is a technical problem",
+        "category": "Technical",
+        "confidence": "Not supplied for this particular example."
+      },
+      {
+        "augmented": true,
+        "email": "I cannot reset my password; the reset link keeps expiring.",
+        "reasoning": "Customer unable to reset password due to link expiration, related to technical support",
+        "category": "Technical",
+        "confidence": "Not supplied for this particular example."
+      },
+      {
+        "augmented": true,
+        "email": "Please cancel my plan and issue a refund for this month.",
+        "reasoning": "Customer requests cancellation and refund, which relate to billing and refund issues",
+        "category": "Refund",
+        "confidence": "Not supplied for this particular example."
+      },
+      {
+        "email": "My invoice shows the wrong tax ID and needs correction.",
+        "category": "Billing",
+        "reasoning": "Invoice correction is billing-related"
+      },
+      {
+        "email": "How do I change my company address on the account?",
+        "category": "General",
+        "reasoning": "Account profile update question"
+      },
+      {
+        "email": "What are your support hours and where can I find the docs?",
+        "category": "General",
+        "reasoning": "General information request"
+      },
+      {
+        "email": "The service did not meet expectations; I want my money back.",
+        "category": "Refund",
+        "reasoning": "Dissatisfaction with service and refund request"
+      },
+      {
+        "email": "How do I delete my account permanently?",
+        "category": "Billing",
+        "reasoning": "Customer asking about account management procedures"
+      }
+    ],
+    "signature": {
+      "instructions": "Classify a support email into a single category.",
+      "fields": [
+        {
+          "prefix": "Email:",
+          "description": "Customer support email text"
+        },
+        {
+          "prefix": "Reasoning:",
+          "description": "Short justification"
+        },
+        {
+          "prefix": "Category:",
+          "description": "Billing, Technical, Refund, or General"
+        },
+        {
+          "prefix": "Confidence:",
+          "description": "Integer from 0 to 10"
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.12",
+      "dspy": "3.0.4",
+      "cloudpickle": "3.1"
+    }
+  }
+}
