@@ -24,6 +24,7 @@ This repository provides practical examples comparing traditional manual prompt 
 - [1. Prompt Engineering Problems](docs/1.Prompt_Engineering.md) - Explore common challenges in prompt engineering and how DSPy addresses them.
 - [2. Multi-Stage Workflow](docs/2.Multi-Stage%20Workflow.md) - See how DSPy enables modular, reusable pipelines for complex tasks.
 - [3. Tool Calling and Reasoning](docs/3.Tool%20Calling.md) - Learn how DSPy structures reasoning and tool use for better performance and auditability.
+- [4. Few-Shot Learning and Training](docs/4.FewShotLearning-Training.md) - Understand how DSPy automates few-shot example selection and optimization.
 # Local Setup
 
 - Open this solution in dev container mode, then run the files mentioned in the [Documentation Hierarchy](#documentation-hierarchy)
