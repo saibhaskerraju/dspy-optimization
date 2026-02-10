@@ -67,11 +67,16 @@ flowchart TD
 
 # Local Setup
 
-- Open this solution in dev container mode, then run the files mentioned in the [Documentation Hierarchy](#documentation-hierarchy)
+- Open this solution in dev container mode
+- Run the following command to activate environment
+```sh
+make print
+```
+- Go through the documents inside docs folder to understand the concepts
+- Run the python files to see the results
+- Make sure `mlflow` is enabled for Local Debugging
 
-# Enable MLflow for Local Debugging
-
-- Run the following command
+- Run the following command to enable mlflow server
 ```sh
 mlflow server --backend-store-uri sqlite:///mydb.sqlite
 ```
