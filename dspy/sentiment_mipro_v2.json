@@ -1,0 +1,36 @@
+{
+  "classify.predict": {
+    "traces": [],
+    "train": [],
+    "demos": [],
+    "signature": {
+      "instructions": "Classify sentiment with confidence and reasoning.",
+      "fields": [
+        {
+          "prefix": "Email:",
+          "description": "Customer email text"
+        },
+        {
+          "prefix": "Reasoning:",
+          "description": "Short justification"
+        },
+        {
+          "prefix": "Sentiment:",
+          "description": "Positive, Negative, or Neutral"
+        },
+        {
+          "prefix": "Confidence:",
+          "description": "Integer from 0 to 100"
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.12",
+      "dspy": "3.0.4",
+      "cloudpickle": "3.1"
+    }
+  }
+}

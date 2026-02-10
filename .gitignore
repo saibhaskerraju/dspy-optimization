@@ -210,3 +210,4 @@ mlartifacts/
 mlruns/
 data/
 *.sqlite
+old/

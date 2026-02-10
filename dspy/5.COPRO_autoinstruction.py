@@ -7,7 +7,7 @@ from dspy.teleprompt import COPRO
 mlflow.dspy.autolog()
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
 # Create a unique name for your experiment.
-mlflow.set_experiment("dspyfewshot")
+mlflow.set_experiment("dspyfewshotcopro")
 
 key = os.getenv("AZURE_OPENAI_API_KEY")
 llm = dspy.LM(model=f"azure/{os.getenv('AZURE_OPENAI_MODEL')}", api_key=key, api_base=os.getenv(
@@ -16,25 +16,44 @@ llm = dspy.LM(model=f"azure/{os.getenv('AZURE_OPENAI_MODEL')}", api_key=key, api
 dspy.settings.configure(lm=llm, trace=[])
 
 # 🔥 PROBLEM: Sales Email Qualification - Complex Multi-Factor Analysis
+
+
 class QualifySalesLead(dspy.Signature):
     """Analyze sales emails and predict deal success probability."""
-    email_conversation = dspy.InputField(desc="Email exchange between sales and prospect")
-    company_tier = dspy.OutputField(desc="Startup, SMB, Mid-Market, Enterprise")
+    email_conversation = dspy.InputField(
+        desc="Email exchange between sales and prospect")
+    company_tier = dspy.OutputField(
+        desc="Startup, SMB, Mid-Market, Enterprise")
     decision_maker_engaged = dspy.OutputField(desc="yes, no, or partially")
-    budget_alignment = dspy.OutputField(desc="below, within, or above our pricing")
+    budget_alignment = dspy.OutputField(
+        desc="below, within, or above our pricing")
     urgency_level = dspy.OutputField(desc="low, medium, high, critical")
-    deal_stage = dspy.OutputField(desc="Discovery, Demo, Proposal, Negotiation, Closed-Won, Closed-Lost")
+    deal_stage = dspy.OutputField(
+        desc="Discovery, Demo, Proposal, Negotiation, Closed-Won, Closed-Lost")
     confidence_score = dspy.OutputField(desc="0-100% probability of closing")
-    next_best_action = dspy.OutputField(desc="Specific recommended sales action")
+    next_best_action = dspy.OutputField(
+        desc="Specific recommended sales action")
     reasoning = dspy.OutputField(desc="Step-by-step analysis of all factors")
+
 
 class SalesQualifier(dspy.Module):
     def __init__(self):
         super().__init__()
         self.qualify = dspy.ChainOfThought(QualifySalesLead)
-    
+
     def forward(self, email_conversation):
         return self.qualify(email_conversation=email_conversation)
+
+
+def exact_match(example, pred, trace=None) -> bool:
+    return (
+        example.company_tier.lower() == pred.company_tier.lower()
+        and example.decision_maker_engaged.lower() == pred.decision_maker_engaged.lower()
+        and example.budget_alignment.lower() == pred.budget_alignment.lower()
+        and example.urgency_level.lower() == pred.urgency_level.lower()
+        and example.deal_stage.lower() == pred.deal_stage.lower()
+    )
+
 
 # 🎯 TRAINING DATA: Real-world sales scenarios
 trainset = [
@@ -45,7 +64,7 @@ trainset = [
         Prospect: "That's higher than expected. We'll discuss internally."
         """,
         company_tier="Startup",
-        decision_maker_engaged="partially", 
+        decision_maker_engaged="partially",
         budget_alignment="below",
         urgency_level="low",
         deal_stage="Discovery",
@@ -53,7 +72,7 @@ trainset = [
         next_best_action="Send case studies showing ROI for similar startups",
         reasoning="Startup with budget concerns, no decision maker engaged, early stage discussion"
     ).with_inputs('email_conversation'),
-    
+
     dspy.Example(
         email_conversation="""
         Prospect: "I'm the CTO at 500-employee company. We need this implemented before Q4."
@@ -62,21 +81,21 @@ trainset = [
         """,
         company_tier="Mid-Market",
         decision_maker_engaged="yes",
-        budget_alignment="within", 
+        budget_alignment="within",
         urgency_level="high",
         deal_stage="Demo",
         confidence_score="75%",
         next_best_action="Schedule technical deep dive with solutions architect",
         reasoning="CTO engaged, budget approved, timeline urgency, mid-market company"
     ).with_inputs('email_conversation'),
-    
+
     dspy.Example(
         email_conversation="""
         Prospect: "We're evaluating vendors for $500K annual contract. Send security docs."
         Sales: "Here's our SOC2 compliance. When can we discuss your requirements?"
         Prospect: "Our procurement team will review. We're deciding in 30 days."
         """,
-        company_tier="Enterprise", 
+        company_tier="Enterprise",
         decision_maker_engaged="partially",
         budget_alignment="above",
         urgency_level="medium",
@@ -84,6 +103,70 @@ trainset = [
         confidence_score="60%",
         next_best_action="Engage procurement team directly with compliance documentation",
         reasoning="Large contract, procurement process, security focus, longer sales cycle"
+    ).with_inputs('email_conversation'),
+
+    dspy.Example(
+        email_conversation="""
+        Prospect: "We're a 120-person SaaS company and need 40 seats. Can you share pricing?"
+        Sales: "Our team plan is $49 per seat. Want a quick demo?"
+        Prospect: "Yes, next week works. Our COO will join."
+        """,
+        company_tier="SMB",
+        decision_maker_engaged="yes",
+        budget_alignment="within",
+        urgency_level="medium",
+        deal_stage="Demo",
+        confidence_score="70%",
+        next_best_action="Schedule demo and confirm COO agenda",
+        reasoning="SMB size, decision maker engaged, pricing acceptable, demo scheduled"
+    ).with_inputs('email_conversation'),
+
+    dspy.Example(
+        email_conversation="""
+        Prospect: "We are a 20-person startup and need a cheap plan, under $100/month."
+        Sales: "Our lowest plan is $199/month. We can offer a 10% discount annually."
+        Prospect: "That is still too high. We will revisit later."
+        """,
+        company_tier="Startup",
+        decision_maker_engaged="no",
+        budget_alignment="below",
+        urgency_level="low",
+        deal_stage="Discovery",
+        confidence_score="15%",
+        next_best_action="Send self-serve resources and check back next quarter",
+        reasoning="Budget mismatch, no decision maker, low urgency, early stage"
+    ).with_inputs('email_conversation'),
+
+    dspy.Example(
+        email_conversation="""
+        Prospect: "We need to expand from 200 to 800 seats in 60 days. What is the timeline?"
+        Sales: "We can implement in 4-6 weeks with dedicated support."
+        Prospect: "Great, procurement is ready if security review passes."
+        """,
+        company_tier="Mid-Market",
+        decision_maker_engaged="partially",
+        budget_alignment="within",
+        urgency_level="high",
+        deal_stage="Proposal",
+        confidence_score="65%",
+        next_best_action="Start security review and share implementation plan",
+        reasoning="Expansion request, high urgency, procurement involved, mid-market scale"
+    ).with_inputs('email_conversation'),
+
+    dspy.Example(
+        email_conversation="""
+        Prospect: "We are closing another vendor due to poor support. Can you migrate us in 2 weeks?"
+        Sales: "We can expedite with a migration team, but it requires enterprise pricing."
+        Prospect: "If you can commit to the timeline, we can proceed."
+        """,
+        company_tier="Enterprise",
+        decision_maker_engaged="yes",
+        budget_alignment="above",
+        urgency_level="critical",
+        deal_stage="Negotiation",
+        confidence_score="80%",
+        next_best_action="Confirm timeline SLA and send enterprise proposal",
+        reasoning="Enterprise urgency, decision maker aligned, timeline critical, pricing accepted"
     ).with_inputs('email_conversation'),
 ]
 
@@ -135,7 +218,7 @@ print("   • Learning to identify buying signals")
 print("   • Optimizing for enterprise sales patterns")
 
 copro_optimizer = COPRO(
-    metric=lambda example, pred, trace=None: 1.0,  # Simple metric for demo
+    metric=exact_match,
     depth=2,           # Optimization rounds
     breadth=3,         # Candidate strategies
     verbose=True,      # Show the optimization process
@@ -156,7 +239,7 @@ optimized_pred = optimized_qualifier(complex_email)
 
 print("🎯 Optimized AI Analysis:")
 print(f"   Company Tier: {optimized_pred.company_tier}")
-print(f"   Decision Maker: {optimized_pred.decision_maker_engaged}") 
+print(f"   Decision Maker: {optimized_pred.decision_maker_engaged}")
 print(f"   Budget: {optimized_pred.budget_alignment}")
 print(f"   Urgency: {optimized_pred.urgency_level}")
 print(f"   Deal Stage: {optimized_pred.deal_stage}")
