@@ -56,8 +56,6 @@ flowchart TD
 
 ### Explanation
 
-### Explanation
-
 1. **Main Application**: The core application that serves user requests and logs interactions.
 2. **Production Feedback Data**: Real-world data collected from user interactions (e.g., corrections, ratings) used to improve the system.
 3. **Retrain Prompts**: Using the feedback data to optimize instructions and few-shot examples (via MIPRO/COPRO).
