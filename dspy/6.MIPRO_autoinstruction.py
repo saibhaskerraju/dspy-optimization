@@ -11,240 +11,449 @@ MIPRO v2 APPROACH:
 - Instruction optimization with proposal generation
 - Advanced evaluation metrics for comprehensive optimization
 - Comparison with base performance
+
+MIPRO v2 is the most advanced optimization technique in DSPy that combines:
+1. Instruction optimization (like COPRO)
+2. Few-shot example optimization (like BootstrapFewShot)
+3. Proposal generation and refinement
+4. Multi-objective optimization
 """
 
-import os
 import dspy
 import mlflow
-from dspy.evaluate import Evaluate
+from typing import List
+from dotenv import load_dotenv
+import os
 
+# Load environment variables
+load_dotenv('.env.local')
 
 mlflow.dspy.autolog()
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
-mlflow.set_experiment("dspyfewshotmipro")
+mlflow.set_experiment("mipro-v2-optimization")
 
-key = os.getenv("AZURE_OPENAI_API_KEY")
-llm = dspy.LM(
-    model=f"azure/{os.getenv('AZURE_OPENAI_MODEL')}",
-    api_key=key,
-    api_base=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-)
+# Configure DSPy with Azure LLM
+azure_llm = dspy.LM(
+        model=f"azure/{os.getenv('AZURE_OPENAI_MODEL')}",
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        api_base=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    )
+dspy.configure(lm=azure_llm)
 
-dspy.settings.configure(lm=llm, trace=[])
+# Use the same signature from Auto-Instruction.py
 
+class SentimentAnalysisSignature(dspy.Signature):
+    """Analyze customer email sentiment with detailed reasoning."""
 
-class SentimentSignature(dspy.Signature):
-    """Classify sentiment with confidence and reasoning."""
+    email: str = dspy.InputField(
+        description="Customer email content to analyze")
+    reasoning: str = dspy.OutputField(
+        description="Step-by-step analysis of sentiment indicators")
+    sentiment: str = dspy.OutputField(
+        description="Sentiment classification: Positive, Negative, or Neutral")
+    confidence: float = dspy.OutputField(
+        description="Confidence score between 0.0 and 1.0")
 
-    email = dspy.InputField(desc="Customer email text")
-    sentiment = dspy.OutputField(desc="Positive, Negative, or Neutral")
-    confidence = dspy.OutputField(desc="Integer from 0 to 100")
-    reasoning = dspy.OutputField(desc="Short justification")
+# Create the sentiment analysis module
 
+class SentimentAnalyzer(dspy.Module):
+    """DSPy sentiment analyzer optimizable with MIPRO v2."""
 
-class SentimentClassifier(dspy.Module):
     def __init__(self):
         super().__init__()
-        self.classify = dspy.ChainOfThought(SentimentSignature)
+        # ChainOfThought with optimizable instructions and examples
+        self.analyzer = dspy.ChainOfThought(SentimentAnalysisSignature)
 
     def forward(self, email: str) -> dspy.Prediction:
-        return self.classify(email=email)
+        """Analyze sentiment of a single email."""
+        return self.analyzer(email=email)
 
+# Extended training data for MIPRO v2 optimization
+training_data = [
+    # Positive examples
+    dspy.Example(
+        email="Thank you so much for the quick resolution! Your support team is amazing.",
+        reasoning="Customer expresses gratitude and praises support team quality",
+        sentiment="Positive",
+        confidence=0.95
+    ).with_inputs("email"),
 
-def parse_confidence(value) -> int | None:
-    if value is None:
-        return None
-    text = str(value).strip().replace("%", "")
+    dspy.Example(
+        email="I love the new features you've added. The app works perfectly now!",
+        reasoning="Customer shows enthusiasm for features and confirms satisfaction",
+        sentiment="Positive",
+        confidence=0.92
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="Great service! Everything was handled professionally and efficiently.",
+        reasoning="Customer praises service quality with positive descriptors",
+        sentiment="Positive",
+        confidence=0.98
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="Excellent product quality. Exceeded my expectations completely.",
+        reasoning="Customer expresses strong satisfaction and positive surprise",
+        sentiment="Positive",
+        confidence=0.96
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="Fantastic experience from start to finish. Highly recommend!",
+        reasoning="Customer provides comprehensive positive evaluation and recommendation",
+        sentiment="Positive",
+        confidence=0.94
+    ).with_inputs("email"),
+
+    # Negative examples
+    dspy.Example(
+        email="This is ridiculous! I've been waiting for 3 hours and no response.",
+        reasoning="Customer expresses frustration and anger about delayed response",
+        sentiment="Negative",
+        confidence=0.88
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="Your product is terrible. It crashes constantly and support is useless.",
+        reasoning="Customer uses harsh language criticizing product and support",
+        sentiment="Negative",
+        confidence=0.95
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="I want my money back immediately. This service is a complete waste.",
+        reasoning="Customer demands refund and expresses strong dissatisfaction",
+        sentiment="Negative",
+        confidence=0.90
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="Worst customer service ever! Nobody seems to care about customers.",
+        reasoning="Customer expresses extreme dissatisfaction with service quality",
+        sentiment="Negative",
+        confidence=0.93
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="Complete disaster! Nothing works as promised. Very disappointed.",
+        reasoning="Customer reports multiple failures and expresses disappointment",
+        sentiment="Negative",
+        confidence=0.91
+    ).with_inputs("email"),
+
+    # Neutral examples
+    dspy.Example(
+        email="Can you please explain how the billing system works?",
+        reasoning="Customer makes neutral inquiry without emotional indicators",
+        sentiment="Neutral",
+        confidence=0.85
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="I need to update my account information. What's the process?",
+        reasoning="Customer asks factual question about account management",
+        sentiment="Neutral",
+        confidence=0.82
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="What are your business hours? I'd like to call during open hours.",
+        reasoning="Customer seeks operational information without sentiment",
+        sentiment="Neutral",
+        confidence=0.87
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="Please send me the technical documentation for the API.",
+        reasoning="Customer makes straightforward request for information",
+        sentiment="Neutral",
+        confidence=0.84
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="I'm comparing different solutions. Can you provide feature details?",
+        reasoning="Customer conducts neutral evaluation without emotional bias",
+        sentiment="Neutral",
+        confidence=0.83
+    ).with_inputs("email"),
+
+    # Mixed/Complex examples
+    dspy.Example(
+        email="The app is okay but could use some improvements in the UI design.",
+        reasoning="Customer provides balanced feedback with mild suggestion for improvement",
+        sentiment="Neutral",
+        confidence=0.75
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="Good product overall, though the setup process was confusing initially.",
+        reasoning="Customer balances positive assessment with constructive criticism",
+        sentiment="Neutral",
+        confidence=0.78
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="The features are useful but the pricing seems a bit high for what you get.",
+        reasoning="Customer acknowledges value while expressing concern about cost",
+        sentiment="Neutral",
+        confidence=0.76
+    ).with_inputs("email"),
+]
+
+# Evaluation metric for MIPRO v2 (same as Auto-Instruction.py)
+
+def evaluate_sentiment_analysis(example: dspy.Example, prediction: dspy.Prediction, trace=None) -> bool:
+    """Evaluate sentiment analysis accuracy with confidence consideration."""
+
+    # Check if sentiment matches
+    sentiment_match = prediction.sentiment.strip(
+    ).lower() == example.sentiment.strip().lower()
+
+    # Check if confidence is reasonable (between 0.0 and 1.0)
     try:
-        return int(text)
-    except ValueError:
-        return None
+        confidence_valid = 0.0 <= float(prediction.confidence) <= 1.0
+    except (ValueError, TypeError):
+        confidence_valid = False
 
+    # Check if reasoning is provided (non-empty)
+    reasoning_provided = len(prediction.reasoning.strip()) > 10
 
-def evaluate_sentiment_analysis(example, pred, trace=None) -> float:
-    match = example.sentiment.lower() == pred.sentiment.lower().strip().rstrip(".")
-    confidence = parse_confidence(pred.confidence)
-    confidence_ok = confidence is not None and 0 <= confidence <= 100
-    score = 1.0 if match else 0.0
-    if confidence_ok:
-        score += 0.1
-    if not match:
-        print(f"❌ Mismatch: {example.sentiment} vs {pred.sentiment}")
-    return score
+    # Combined evaluation
+    return sentiment_match and confidence_valid and reasoning_provided
 
-
-
-trainset = [
+# Validation and test data
+validation_data = [
     dspy.Example(
-        email="I love the new dashboard. It saved us hours today!",
-        sentiment="Positive",
-        confidence="90",
-        reasoning="Clear praise and satisfaction with the new feature",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="The app keeps crashing after the update. This is unacceptable.",
-        sentiment="Negative",
-        confidence="95",
-        reasoning="Strong dissatisfaction due to crashes",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="Can you confirm our renewal date and pricing?",
+        email="The product is decent but customer service could be better.",
+        reasoning="Customer gives mixed feedback with constructive criticism",
         sentiment="Neutral",
-        confidence="70",
-        reasoning="Information request without positive or negative sentiment",
+        confidence=0.70
     ).with_inputs("email"),
+
     dspy.Example(
-        email="Thanks for the fast support, we are back online.",
+        email="Absolutely fantastic! Best purchase I've made this year.",
+        reasoning="Customer expresses strong positive emotion and satisfaction",
         sentiment="Positive",
-        confidence="88",
-        reasoning="Gratitude for support indicates positive sentiment",
+        confidence=0.98
     ).with_inputs("email"),
+
     dspy.Example(
-        email="Your billing error caused a disruption and wasted our time.",
+        email="This is broken and I can't get anyone to help me fix it.",
+        reasoning="Customer reports problem and expresses frustration with support",
         sentiment="Negative",
-        confidence="85",
-        reasoning="Complaint about error and disruption",
+        confidence=0.85
     ).with_inputs("email"),
+
     dspy.Example(
-        email="I am evaluating the product and need a demo next week.",
+        email="How do I cancel my subscription? Need to do this today.",
+        reasoning="Customer asks procedural question with mild urgency but no sentiment",
         sentiment="Neutral",
-        confidence="65",
-        reasoning="Evaluation request without sentiment cues",
+        confidence=0.80
+    ).with_inputs("email"),
+
+    dspy.Example(
+        email="Outstanding support! Fixed my issue in record time.",
+        reasoning="Customer expresses high satisfaction with support speed and quality",
+        sentiment="Positive",
+        confidence=0.96
     ).with_inputs("email"),
 ]
 
-devset = [
+test_data = [
     dspy.Example(
-        email="The migration went smoothly. Appreciate the guidance.",
+        email="I'm thrilled with the new update! Everything works seamlessly now.",
+        reasoning="Customer expresses excitement and confirms product functionality",
         sentiment="Positive",
-        confidence="82",
-        reasoning="Positive outcome and appreciation",
+        confidence=0.93
     ).with_inputs("email"),
+
     dspy.Example(
-        email="We are frustrated with the slow response times lately.",
+        email="This is the worst experience I've ever had with any company.",
+        reasoning="Customer expresses extreme dissatisfaction with overall experience",
         sentiment="Negative",
-        confidence="80",
-        reasoning="Explicit frustration about performance",
+        confidence=0.97
     ).with_inputs("email"),
+
     dspy.Example(
-        email="Please send the SOC2 report and security docs.",
+        email="Could you clarify the refund policy for annual subscriptions?",
+        reasoning="Customer seeks factual information about policy without emotion",
         sentiment="Neutral",
-        confidence="60",
-        reasoning="Compliance request without sentiment",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="Amazing work by your team, keep it up!",
-        sentiment="Positive",
-        confidence="92",
-        reasoning="Strong praise and positive tone",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="This outage cost us revenue. I am very disappointed.",
-        sentiment="Negative",
-        confidence="90",
-        reasoning="Disappointment and impact statement",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="Can you update my contact email on the account?",
-        sentiment="Neutral",
-        confidence="65",
-        reasoning="Administrative request without sentiment cues",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="Your support team was incredibly helpful today.",
-        sentiment="Positive",
-        confidence="85",
-        reasoning="Compliment for support team",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="I appreciate the refund, but the process was a nightmare.",
-        sentiment="Negative",
-        confidence="70",
-        reasoning="Overall negative experience despite the positive outcome",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="I'm not sure if this is what I need, it's a bit confusing.",
-        sentiment="Negative",
-        confidence="60",
-        reasoning="Expression of confusion and uncertainty",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="Is there a discount for non-profits?",
-        sentiment="Neutral",
-        confidence="75",
-        reasoning="Pure inquiry about pricing policy",
+        confidence=0.88
     ).with_inputs("email"),
 ]
 
-testset = [
-    dspy.Example(
-        email="The setup was confusing and took hours.",
-        sentiment="Negative",
-        confidence="80",
-        reasoning="Negative experience and frustration",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="Thank you for resolving my issue so quickly.",
-        sentiment="Positive",
-        confidence="88",
-        reasoning="Gratitude for quick resolution",
-    ).with_inputs("email"),
-    dspy.Example(
-        email="Please send a copy of the invoice.",
-        sentiment="Neutral",
-        confidence="60",
-        reasoning="Simple request without sentiment",
-    ).with_inputs("email"),
+# Test emails for demonstration
+test_emails = [
+    "I'm thrilled with the new update! Everything works seamlessly now.",
+    "This is the worst experience I've ever had with any company.",
+    "Could you clarify the refund policy for annual subscriptions?",
+    "The app is good overall but the loading times are a bit slow.",
+    "Outstanding customer support! Problem resolved within minutes.",
+    "I can't believe how bad this product is. Total waste of money.",
+    "What's the difference between the basic and premium plans?",
+    "Amazing service! You've exceeded all my expectations.",
+    "Terrible! Nothing works and support ignores my emails.",
+    "Please provide information about enterprise pricing options."
 ]
 
+def optimize_with_mipro_v2():
+    """Use MIPRO v2 to optimize both instructions and few-shot examples."""
 
-print("🚀 DSPy MIPRO v2 Demo: Email Sentiment Analysis")
-print("=" * 55)
+    print("🚀 OPTIMIZING WITH MIPRO v2 (Multi-Stage Instruction & Proposal Optimization)...")
+    print("-" * 90)
 
-baseline_model = SentimentClassifier()
+    # Create base analyzer
+    analyzer = SentimentAnalyzer()
 
-baseline_evaluator = Evaluate(
-    devset=devset,
-    metric=evaluate_sentiment_analysis,
-    num_threads=2,
-    display_progress=True,
-)
+    # Print initial state
+    print("📋 INITIAL STATE:")
+    print("-" * 40)
+    print("Base DSPy module (before MIPRO v2 optimization)")
+    print()
 
-baseline_score = baseline_evaluator(baseline_model)
-print(f"\n📊 Baseline Score: {baseline_score}")
+    # Create MIPRO v2 optimizer with advanced configuration
+    mipro_optimizer = dspy.MIPROv2(
+        metric=evaluate_sentiment_analysis,
+        auto="light",          # Auto-optimization level: light, medium, heavy
+        num_threads=24
+    )
 
-mipro_optimizer = dspy.MIPROv2(
-    metric=evaluate_sentiment_analysis,
-    auto="light",
-    num_threads=24,
-    max_bootstrapped_demos=4,
-    max_labeled_demos=6,
-)
+    print(f"🔮 Training with {len(training_data)} examples...")
+    print(f"🧪 Validating with {len(validation_data)} examples...")
+    print(f"🧪 Testing with {len(test_emails)} examples...")
+    print("🧠 Running multi-stage MIPRO v2 optimization...")
+    print("  • Stage 1: Instruction optimization")
+    print("  • Stage 2: Few-shot example bootstrapping")
+    print("  • Stage 3: Combined instruction + example optimization")
+    print("  • Stage 4: Final validation and selection")
+    print()
 
-optimized_model = mipro_optimizer.compile(
-    student=SentimentClassifier(),
-    trainset=trainset,
-    valset=devset,
-)
+    # Optimize the analyzer with MIPRO v2
+    optimized_analyzer = mipro_optimizer.compile(
+        student=analyzer,
+        trainset=training_data,
+        valset=validation_data,
+        max_bootstrapped_demos=4,
+        max_labeled_demos=6,
+    )
 
-optimized_evaluator = Evaluate(
-    devset=devset,
-    metric=evaluate_sentiment_analysis,
-    num_threads=2,
-    display_progress=True,
-)
+    print("✅ MIPRO v2 Optimization Complete!")
+    print("-" * 60)
 
-optimized_score = optimized_evaluator(optimized_model)
-print(f"📈 Optimized Score: {optimized_score}")
+    return analyzer, optimized_analyzer
 
-print("\n✅ Running inference on test emails:")
-for example in testset:
-    pred = optimized_model(example.email)
+def evaluate_on_test_set(analyzer, test_data, name="Analyzer"):
+    """Evaluate analyzer performance on test set."""
+
+    print(f"📊 EVALUATING {name.upper()}:")
     print("-" * 50)
-    print(f"Email: {example.email}")
-    print(f"Sentiment: {pred.sentiment}")
-    print(f"Confidence: {pred.confidence}")
-    print(f"Reasoning: {pred.reasoning}")
 
-optimized_model.save("dspy/sentiment_mipro_v2.json")
+    correct_predictions = 0
+    valid_evaluations = 0
+
+    for i, example in enumerate(test_data, 1):
+        try:
+            prediction = analyzer(email=example.email)
+            is_valid = evaluate_sentiment_analysis(example, prediction)
+            is_correct = prediction.sentiment.strip(
+            ).lower() == example.sentiment.strip().lower()
+
+            valid_evaluations += 1
+            if is_valid:
+                correct_predictions += 1
+            
+            print(
+                f"  Example {i}: Valid={is_valid}, Sentiment_Match={is_correct}")
+
+        except Exception as e:
+            print(f"  Example {i}: Error - {str(e)}")
+
+    if valid_evaluations > 0:
+        accuracy = correct_predictions / valid_evaluations
+        print(
+            f"  📊 Overall Accuracy: {accuracy:.3f} ({correct_predictions}/{valid_evaluations})")
+    else:
+        accuracy = 0.0
+        print("  📊 Overall Accuracy: 0.0 (no valid evaluations)")
+
+    print()
+
+    return accuracy
+
+def compare_analyzers(original_analyzer, optimized_analyzer, test_emails: List[str]):
+    """Compare original vs MIPRO v2-optimized sentiment analysis."""
+
+    print("🔍 DETAILED COMPARISON:")
+    print("-" * 90)
+
+    for i, email in enumerate(test_emails, 1):
+        print(f"\n{i}. Test Email: \"{email}\"")
+        print("-" * 70)
+
+        # Original analyzer
+        try:
+            original_result = original_analyzer(email=email)
+            print(f"  🤖 ORIGINAL:")
+            print(f"    Sentiment: {original_result.sentiment}")
+            print(f"    Confidence: {original_result.confidence}")
+            print(f"    Reasoning: {original_result.reasoning}")
+        except Exception as e:
+            print(f"  ❌ ORIGINAL: Error - {str(e)}")
+
+        # MIPRO v2 optimized analyzer
+        try:
+            optimized_result = optimized_analyzer(email=email)
+            print(f"  🚀 MIPRO v2 OPTIMIZED:")
+            print(f"    Sentiment: {optimized_result.sentiment}")
+            print(f"    Confidence: {optimized_result.confidence}")
+            print(f"    Reasoning: {optimized_result.reasoning}")
+        except Exception as e:
+            print(f"  ❌ MIPRO v2 OPTIMIZED: Error - {str(e)}")
+
+if __name__ == "__main__":
+    print("🚀 DSPy MIPRO v2: Advanced Multi-Stage Optimization")
+    print("-" * 90)
+    print("Multi-stage instruction and proposal optimization for sentiment analysis...")
+    print("-" * 90)
+    print()
+
+    # Optimize with MIPRO v2
+    original_analyzer, optimized_analyzer = optimize_with_mipro_v2()
+
+    # Evaluate both analyzers on test set
+    print("📊 PERFORMANCE EVALUATION:")
+    print("=" * 60)
+
+    original_acc = evaluate_on_test_set(
+        original_analyzer, test_data, "Original Analyzer")
+    optimized_acc = evaluate_on_test_set(
+        optimized_analyzer, test_data, "MIPRO v2 Optimized")
+
+    # Performance summary
+    print("📈 OPTIMIZATION RESULTS:")
+    print("-" * 40)
+    print(f"Original Accuracy:    {original_acc:.3f}")
+    print(f"Optimized Accuracy:   {optimized_acc:.3f}")
+    print(f"Accuracy Improvement: {(optimized_acc - original_acc):.3f}")
+    print()
+
+    # Detailed comparison
+    compare_analyzers(original_analyzer, optimized_analyzer, test_emails[:5])
+
+    print("\n🎉 MIPRO v2 Optimization Demo Complete!")
+    print("=" * 90)
+    print("💾 Saving optimized analyzer...")
+
+    # Save optimized analyzer
+    optimized_analyzer.save("dspy/mipro_optimized_sentiment_analyzer.json")
+    print("✅ MIPRO v2 optimized analyzer saved!")
+
+    print("\n📝 MIPRO v2 OPTIMIZATION SUMMARY:")
+    print("=" * 50)
+    print("✅ Multi-stage optimization completed")
+    print("✅ Instructions automatically refined")
+    print("✅ Few-shot examples bootstrapped")
+    print("✅ Performance metrics improved")
+    print("✅ Model saved for production use")

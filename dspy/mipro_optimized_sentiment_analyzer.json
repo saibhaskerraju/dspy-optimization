@@ -1,0 +1,75 @@
+{
+  "analyzer.predict": {
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "email": "I want my money back immediately. This service is a complete waste.",
+        "reasoning": "Customer is highly dissatisfied, indicating frustration and wanting a refund",
+        "sentiment": "Negative",
+        "confidence": 0.94
+      },
+      {
+        "augmented": true,
+        "email": "Great service! Everything was handled professionally and efficiently.",
+        "reasoning": "Customer expresses positive experience with service, highlighting professionalism and efficiency",
+        "sentiment": "Positive",
+        "confidence": 0.97
+      },
+      {
+        "email": "Good product overall, though the setup process was confusing initially.",
+        "reasoning": "Customer balances positive assessment with constructive criticism",
+        "sentiment": "Neutral",
+        "confidence": 0.78
+      },
+      {
+        "email": "The app is okay but could use some improvements in the UI design.",
+        "reasoning": "Customer provides balanced feedback with mild suggestion for improvement",
+        "sentiment": "Neutral",
+        "confidence": 0.75
+      },
+      {
+        "email": "I need to update my account information. What's the process?",
+        "reasoning": "Customer asks factual question about account management",
+        "sentiment": "Neutral",
+        "confidence": 0.82
+      },
+      {
+        "email": "I love the new features you've added. The app works perfectly now!",
+        "reasoning": "Customer shows enthusiasm for features and confirms satisfaction",
+        "sentiment": "Positive",
+        "confidence": 0.92
+      }
+    ],
+    "signature": {
+      "instructions": "Generate a clear, detailed prompt instructing a language model to analyze customer emails by breaking down the sentiment indicators within the text. The prompt should guide the model to produce a step-by-step reasoning process that leads to a final sentiment classification (Positive, Negative, or Neutral) along with a confidence score. Emphasize the importance of interpretability, thorough evaluation of language cues, and providing detailed insights into how the sentiment conclusion was reached to enhance accuracy and transparency in customer feedback analysis.",
+      "fields": [
+        {
+          "prefix": "Email:",
+          "description": "Customer email content to analyze"
+        },
+        {
+          "prefix": "Reasoning:",
+          "description": "Step-by-step analysis of sentiment indicators"
+        },
+        {
+          "prefix": "Sentiment:",
+          "description": "Sentiment classification: Positive, Negative, or Neutral"
+        },
+        {
+          "prefix": "Confidence:",
+          "description": "Confidence score between 0.0 and 1.0"
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.12",
+      "dspy": "3.0.4",
+      "cloudpickle": "3.1"
+    }
+  }
+}
